@@ -3,6 +3,8 @@ import sys
 from dotenv import load_dotenv
 from google import genai
 
+from .sop import SYSTEM_PROMPT
+
 # Import the tools we built
 from .tools import (
     get_machine_record, 
@@ -27,9 +29,9 @@ class MaintenanceAgent:
         # Initialize the persistent chat session
         self.chat = self.client.chats.create(
             model=model_name,
-            config={
-                # Passing the raw functions enables automatic execution by the SDK
-                'tools': [
+            config=genai.types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                tools=[
                     get_machine_record,
                     summarize_column,
                     compare_groups,
@@ -37,9 +39,8 @@ class MaintenanceAgent:
                     correlation_analysis,
                     run_sql_query
                 ],
-                # Force low temperature to prevent hallucination and encourage strict data reliance
-                'temperature': 0.0 
-            }
+                temperature=0.0
+            )
         )
 
     def ask(self, user_prompt: str) -> str:

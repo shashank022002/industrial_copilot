@@ -77,6 +77,10 @@ Plus one fallback:
 
 Parses whatever SQL the model writes into an AST using `sqlglot` and checks it against four rules before it's allowed to run: single statement only, `SELECT` only (no `DROP`/`UPDATE`/`INSERT`), only touches the `ai4i2020` table, and stays under the row cap (500 by default) so it doesn't flood the context window.
 
+### `sop.py` 
+
+Defines the strict system prompt and behavioral constraints loaded into the agent session, ensuring the model prioritizes analytical precision, avoids speculation, and adheres strictly to dataset boundaries.
+
 ### `agent.py`
 
 Sets up the `google-genai` client and hands the tools to the chat session directly `client.chats.create(config={'tools': [...]})`. Because the functions are passed in as-is, the SDK handles parallel calls (independent lookups firing at once) and compositional calls (one tool's output feeding the next) without you writing that logic yourself.
