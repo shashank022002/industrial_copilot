@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from dotenv import load_dotenv
 from google import genai
 
@@ -14,6 +15,25 @@ from .tools import (
     correlation_analysis, 
     run_sql_query
 )
+
+_sessions: dict[str, MaintenanceAgent] = {}
+
+def _get_agent(session_id: str) -> MaintenanceAgent:
+    if session_id not in _sessions:
+        _sessions[session_id] = MaintenanceAgent()
+    return _sessions[session_id]
+
+def ask(session_id: str, message: str) -> dict:
+    agent = _get_agent(session_id)
+
+    start = time.perf_counter()
+    answer = agent.ask(message)
+    latency = time.perf_counter() - start
+
+    return {
+        "answer": answer,
+        "latency_seconds": latency,
+    }
 
 class MaintenanceAgent:
     def __init__(self):

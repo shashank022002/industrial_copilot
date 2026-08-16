@@ -53,13 +53,35 @@ SQL_ROW_CAP=500
 python3 -m src.agent
 ```
 
-## What each piece does
+**3. Run the Web Server & Frontend UI**
+Start the FastAPI backend server:
 
-### `data_store.py`
+```bash
+python3 -m src.api
+```
+
+Open your browser and navigate to http://127.0.0.1:8000 to interact with the copilot via the web interface. You can also verify service health at http://127.0.0.1:8000/health.
+
+**4. Run the Evaluation Suite**
+Execute the automated eval framework to score the agent's accuracy against deterministic dataset reference checks:
+
+```bash
+python3 -m evals.run_evals
+```
+
+## System Components
+
+### `api.py` (FastAPI Web Layer)
+Exposes production endpoints (/chat and /health), validates requests and responses using Pydantic models, serves static frontend assets, and handles multi-session routing.
+
+### `static/index.html` (Frontend Interface)
+A lightweight, single-page chat UI providing asynchronous communication with the backend agent, displaying real-time response latency, role badges, and grounding warnings.
+
+### `data_store.py` (Database Engine)
 
 Builds a persistent `local_data.duckdb` file the first time it runs, inferring the schema from `ai4i2020.csv` straight off the CSV. DuckDB handles the aggregations, filtering, and JSON serialization from there.
 
-### `tools.py`
+### `tools.py` (Agent Capabilities)
 
 Five hardcoded tools, kept narrow on purpose so they run fast:
 
@@ -73,18 +95,18 @@ Plus one fallback:
 
 - `run_sql_query` - lets the model write raw SQL, gated by `sql_guard.py`
 
-### `sql_guard.py`
+### `sql_guard.py` (Query Safety)
 
 Parses whatever SQL the model writes into an AST using `sqlglot` and checks it against four rules before it's allowed to run: single statement only, `SELECT` only (no `DROP`/`UPDATE`/`INSERT`), only touches the `ai4i2020` table, and stays under the row cap (500 by default) so it doesn't flood the context window.
 
-### `sop.py` 
+### `sop.py` (Standard Operating Procedures)
 
 Defines the strict system prompt and behavioral constraints loaded into the agent session, ensuring the model prioritizes analytical precision, avoids speculation, and adheres strictly to dataset boundaries.
 
-### `agent.py`
+### `agent.py` (The Orchestrator & Session Manager)
 
 Sets up the `google-genai` client and hands the tools to the chat session directly `client.chats.create(config={'tools': [...]})`. Because the functions are passed in as-is, the SDK handles parallel calls (independent lookups firing at once) and compositional calls (one tool's output feeding the next) without you writing that logic yourself.
 
-### `evals`
+### `evals` (Evaluation Framework)
 
 Provides an isolated, automated benchmark suite using `questions.json` to evaluate the agent's multi-turn conversational memory, numerical tolerance accuracy, and factual text grounding.

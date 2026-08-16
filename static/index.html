@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Industrial Copilot</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; }
+  h1 { font-size: 1.25rem; }
+  #log { border: 1px solid #8884; border-radius: 8px; padding: 1rem; min-height: 400px; max-height: 65vh; overflow-y: auto; margin-bottom: 1rem; }
+  .msg { margin-bottom: 1rem; white-space: pre-wrap; line-height: 1.4; }
+  .msg .role { font-weight: 600; display: block; margin-bottom: 0.2rem; }
+  .msg.user .role { color: #2563eb; }
+  .msg.assistant .role { color: #16a34a; }
+  .warning { color: #b45309; font-size: 0.85rem; margin-top: 0.3rem; }
+  .meta { color: #888; font-size: 0.75rem; margin-top: 0.2rem; }
+  form { display: flex; gap: 0.5rem; }
+  input[type=text] { flex: 1; padding: 0.6rem; border-radius: 6px; border: 1px solid #8884; }
+  button { padding: 0.6rem 1rem; border-radius: 6px; border: none; background: #2563eb; color: white; cursor: pointer; }
+  button:disabled { opacity: 0.5; cursor: default; }
+</style>
+</head>
+<body>
+<h1>Industrial Copilot</h1>
+<div id="log"></div>
+<form id="form">
+  <input id="input" type="text" placeholder="e.g. Why are we seeing more failures at high rotational speeds?" autocomplete="off" />
+  <button id="send" type="submit">Send</button>
+</form>
+
+<script>
+const sessionId = "web-" + Math.random().toString(36).slice(2, 10);
+const log = document.getElementById("log");
+const form = document.getElementById("form");
+const input = document.getElementById("input");
+const send = document.getElementById("send");
+
+function addMessage(role, text) {
+  const div = document.createElement("div");
+  div.className = "msg " + role;
+  const roleSpan = document.createElement("span");
+  roleSpan.className = "role";
+  roleSpan.textContent = role === "user" ? "You" : "Copilot";
+  div.appendChild(roleSpan);
+  div.appendChild(document.createTextNode(text));
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+  return div;
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const message = input.value.trim();
+  if (!message) return;
+  addMessage("user", message);
+  input.value = "";
+  send.disabled = true;
+  const thinking = addMessage("assistant", "...");
+
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, message }),
+    });
+    const data = await res.json();
+    thinking.lastChild.textContent = data.answer;
+    if (data.grounding_warning) {
+      const w = document.createElement("div");
+      w.className = "warning";
+      w.textContent = "⚠ " + data.grounding_warning;
+      thinking.appendChild(w);
+    }
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = data.latency_seconds + "s";
+    thinking.appendChild(meta);
+  } catch (err) {
+    thinking.lastChild.textContent = "Error: " + err;
+  } finally {
+    send.disabled = false;
+    input.focus();
+  }
+});
+</script>
+</body>
+</html>
