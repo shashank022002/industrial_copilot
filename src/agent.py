@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from google import genai
 
 # Import the tools we built
-from tools import (
+from .tools import (
     get_machine_record, 
     summarize_column, 
     compare_groups, 

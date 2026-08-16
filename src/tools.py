@@ -1,6 +1,6 @@
 import pandas as pd
-from data_store import get_connection
-from sql_guard import validate_sql
+from .data_store import get_connection
+from .sql_guard import validate_sql
 
 def get_machine_record(product_id: str) -> str:
     """

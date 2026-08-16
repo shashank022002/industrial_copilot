@@ -22,6 +22,9 @@ src/
   sql_guard.py                # AST-level validation for raw SQL (SELECT-only, row capped)
   tools.py                    # the callables the agent has access to
   agent.py                    # the Gemini chat loop tying model and tools together
+evals/
+  questions.json              # Structured benchmark questions and test cases
+  run_evals.py                # Evaluation runner scoring agent answers against tolerances
 ```
 
 ## Setup
@@ -77,3 +80,7 @@ Parses whatever SQL the model writes into an AST using `sqlglot` and checks it a
 ### `agent.py`
 
 Sets up the `google-genai` client and hands the tools to the chat session directly `client.chats.create(config={'tools': [...]})`. Because the functions are passed in as-is, the SDK handles parallel calls (independent lookups firing at once) and compositional calls (one tool's output feeding the next) without you writing that logic yourself.
+
+### `evals`
+
+Provides an isolated, automated benchmark suite using `questions.json` to evaluate the agent's multi-turn conversational memory, numerical tolerance accuracy, and factual text grounding.

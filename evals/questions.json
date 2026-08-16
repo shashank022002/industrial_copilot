@@ -1,0 +1,44 @@
+[
+  {
+    "id": "understand-1",
+    "category": "understand_behavior",
+    "question": "What is the overall machine failure rate in this dataset?",
+    "expected_numeric": 0.0339,
+    "tolerance": 0.002
+  },
+  {
+    "id": "understand-2",
+    "category": "understand_behavior",
+    "question": "What has been happening with machine M14860?",
+    "expected_contains_any": ["snapshot", "one row", "no time", "no history", "static"]
+  },
+  {
+    "id": "history-1",
+    "category": "historical_analysis",
+    "question": "How many Heat Dissipation Failures (HDF) have occurred?",
+    "expected_numeric": 115,
+    "tolerance": 0
+  },
+  {
+    "id": "failure-1",
+    "category": "investigate_failures",
+    "question": "Compare the operating conditions (torque) of machines that failed versus those that did not.",
+    "expected_numeric": 50.17,
+    "tolerance": 0.5
+  },
+  {
+    "id": "followup-1a",
+    "category": "followup_context",
+    "question": "What is the failure rate for Type L machines?",
+    "expected_numeric": 0.0392,
+    "tolerance": 0.003
+  },
+  {
+    "id": "followup-1b",
+    "category": "followup_context",
+    "question": "And how does that compare to Type H?",
+    "session_ref": "followup-1a",
+    "expected_numeric": 0.0209,
+    "tolerance": 0.003
+  }
+]
