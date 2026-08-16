@@ -1,0 +1,6 @@
+duckdb
+numpy
+pandas
+google-genai 
+python-dotenv
+sqlglot
