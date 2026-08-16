@@ -50,7 +50,7 @@ SQL_ROW_CAP=500
 **3. Run it**
 
 ```bash
-python3 src/agent.py
+python3 -m src.agent
 ```
 
 ## What each piece does
